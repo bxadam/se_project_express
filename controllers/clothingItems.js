@@ -9,8 +9,47 @@ const createItem = (req, res) => {
       res.send({ data: item });
     })
     .catch((e) => {
-      res.status(500).send({ message: "Error from createItem" }, e);
+      console.error(e);
+      res.status(500).send({ message: "Error from createItem" });
     });
 };
 
-module.exports = { createItem };
+const getItems = (req, res) => {
+  ClothingItem.find()
+    .then((items) => {
+      res.send({ data: items });
+    })
+    .catch((e) => {
+      console.error(e);
+      res.status(500).send({ message: "Error from getItems" });
+    });
+};
+
+const deleteItem = (req, res) => {
+  const id = req.params.id;
+  ClothingItem.findByIdAndRemove(id)
+    .then(res.send({ message: "Item deleted" }))
+    .catch((e) => {
+      console.error(e);
+      res.status(500).send({ message: "Error from deleteItem" });
+    });
+};
+
+const likeItem = (req, res) =>
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true }
+  );
+
+const dislikeItem = (req, res) =>
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $pull: { likes: req.user._id } },
+    { new: true }
+  );
+
+module.exports.createItem = (req, res) => {
+  console.log(req.user._id);
+};
+module.exports = { createItem, getItems, deleteItem };
