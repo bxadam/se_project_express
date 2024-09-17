@@ -1,6 +1,7 @@
 const User = require("../models/user");
 
 const getUsers = (req, res) => {
+  console.log(req.user);
   User.find()
     .then((data) => {
       res.send({ data: data });

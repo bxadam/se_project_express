@@ -49,7 +49,4 @@ const dislikeItem = (req, res) =>
     { new: true }
   );
 
-module.exports.createItem = (req, res) => {
-  console.log(req.user._id);
-};
 module.exports = { createItem, getItems, deleteItem };

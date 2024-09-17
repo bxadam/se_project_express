@@ -8,6 +8,6 @@ const {
 
 router.post("/", createItem);
 router.get("/", getItems);
-router.delete("/items", deleteItem);
+router.delete("/:id", deleteItem);
 
 module.exports = router;
