@@ -31,7 +31,7 @@ const clothingItemSchema = new mongoose.Schema({
   },
   likes: [
     {
-      type: ObjectId, //how do i pull the array of user likes
+      type: mongoose.Schema.Types.ObjectId,
       ref: "user",
       default: [],
     },
