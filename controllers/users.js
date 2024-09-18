@@ -1,11 +1,14 @@
 const User = require("../models/user");
+const { findError } = require("../utils/errors");
 
 const getUsers = (req, res) => {
   User.find()
+    .orFail()
     .then((data) => {
       res.send({ data });
     })
     .catch((e) => {
+      console.log(e.name);
       console.error(e);
       res.status(500).send({ message: "Error from getUser" });
     });
@@ -22,7 +25,7 @@ const getUserById = (req, res) => {
     })
     .catch((e) => {
       console.error(e);
-      res.status(500).send({ message: "Error from getUserById" });
+      res.status(400).send({ message: "Error from getUserById" });
     });
 };
 
@@ -34,7 +37,7 @@ const createUser = (req, res) => {
     })
     .catch((e) => {
       console.error(e);
-      res.status(500).send({ message: "Error from createUser" });
+      res.status(400).send({ message: "Error from createUser" });
     });
 };
 
