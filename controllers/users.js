@@ -25,6 +25,7 @@ const getUserById = (req, res) => {
     })
     .catch((e) => {
       console.error(e);
+      res.status(404).send({ message: "Error from getUserById" });
       res.status(400).send({ message: "Error from getUserById" });
     });
 };

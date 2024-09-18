@@ -6,13 +6,12 @@ const badRequest = 400;
 const findError = (Error) => {
   if (Error === "Bad Request") {
     return badRequest;
-  } else if (Error === "Not Found") {
+  } if (Error === "Not Found") {
     return notFound;
-  } else if (Error === "Unauthorized") {
+  } if (Error === "Unauthorized") {
     return unAuthorized;
-  } else {
-    return internalServerError;
   }
+  return internalServerError;
 };
 
 module.exports = { findError };
