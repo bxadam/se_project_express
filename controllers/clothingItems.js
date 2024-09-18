@@ -5,7 +5,6 @@ const createItem = (req, res) => {
 
   ClothingItem.create({ name, weather, imageUrl, owner, likes, createdAt })
     .then((item) => {
-      console.log(item);
       res.send({ data: item });
     })
     .catch((e) => {
@@ -26,7 +25,7 @@ const getItems = (req, res) => {
 };
 
 const deleteItem = (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
   ClothingItem.findByIdAndRemove(id)
     .then(res.send({ message: "Item deleted" }))
     .catch((e) => {
@@ -40,13 +39,23 @@ const likeItem = (req, res) =>
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
-  );
+  )
+    .then(res.send({ message: "Item liked" }))
+    .catch((e) => {
+      console.error(e);
+      res.status(500).send({ message: "Error from likeItem" });
+    });
 
 const dislikeItem = (req, res) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
-  );
+  )
+    .then(res.send({ message: "Item disliked" }))
+    .catch((e) => {
+      console.error(e);
+      res.status(500).send({ message: "Error from dislikeItem" });
+    });
 
 module.exports = { createItem, getItems, deleteItem, likeItem, dislikeItem };
