@@ -49,4 +49,4 @@ const dislikeItem = (req, res) =>
     { new: true }
   );
 
-module.exports = { createItem, getItems, deleteItem };
+module.exports = { createItem, getItems, deleteItem, likeItem, dislikeItem };
