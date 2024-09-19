@@ -12,7 +12,6 @@ mongoose
   .catch(console.error);
 
 app.use((req, res, next) => {
-  console.log("mid running with req.user");
   req.user = {
     _id: "66e9c5de563a63b079950b87",
   };

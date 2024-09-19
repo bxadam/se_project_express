@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const ClothingItem = require("../models/clothingItem");
 
 const createItem = (req, res) => {
@@ -36,11 +38,25 @@ const getItems = (req, res) => {
 };
 
 const deleteItem = (req, res) => {
-  const { _id } = req.params;
-  ClothingItem.findByIdAndRemove(_id)
-    .then(res.send({ message: "Item deleted" }))
+  const { itemId } = req.params;
+  ClothingItem.findByIdAndRemove(itemId)
+    .orFail((err) => {
+      const error = new Error("item not found");
+      error.name = err.name;
+      throw error;
+    })
+    .then(() => {
+      return res.send({ message: "Item deleted" });
+    })
     .catch((e) => {
-      console.error(e);
+      console.error(e.name);
+      if (e.name === "CastError") {
+        return res
+          .status(400)
+          .send({ message: "Bad Request Error from deleteItem" });
+      } else if (e.name === "TypeError") {
+        return res.status(404).send({ message: "404 Error from deleteItem" });
+      }
       res.status(500).send({ message: "Error from deleteItem" });
     });
 };
@@ -59,10 +75,10 @@ const likeItem = (req, res) => {
     .then((item) => res.send(item))
     .catch((e) => {
       console.log(e.name);
-      if (e.name === "DocumentNotFoundError") {
-        res.status(400).send({ message: "400 Item not found" });
-      } else if (e.name === "TypeError") {
+      if (e.name === "TypeError") {
         res.status(404).send({ message: "404 Item not found" });
+      } else if (e.name === "CastError") {
+        res.status(400).send({ message: "400 Item not found" });
       } else {
         res.status(500).send({ message: "Error from likeItem" });
       }
@@ -75,10 +91,23 @@ const dislikeItem = (req, res) => {
     { $pull: { likes: req.user } },
     { new: true }
   )
-    .then(res.send({ message: "Item disliked" }))
+    .orFail((err) => {
+      const error = new Error("item not found");
+      error.name = err.name;
+      throw error;
+    })
+    .then(() => {
+      return res.send({ message: "Item disliked" });
+    })
     .catch((e) => {
-      console.log(e);
-      res.status(500).send({ message: "Error from dislikeItem" });
+      console.log(e.name);
+      if (e.name === "CastError") {
+        return res.status(400).send({ message: "400 Bad Request" });
+      } else if (e.name === "TypeError") {
+        return res.status(404).send({ message: "404 Item not found" });
+      } else {
+        return res.status(500).send({ message: "Error from dislikeItem" });
+      }
     });
 };
 
