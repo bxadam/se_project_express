@@ -36,8 +36,8 @@ const getItems = (req, res) => {
 };
 
 const deleteItem = (req, res) => {
-  const { id } = req.params;
-  ClothingItem.findByIdAndRemove(id)
+  const { _id } = req.params;
+  ClothingItem.findByIdAndRemove(_id)
     .then(res.send({ message: "Item deleted" }))
     .catch((e) => {
       console.error(e);
