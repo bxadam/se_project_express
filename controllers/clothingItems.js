@@ -45,19 +45,31 @@ const deleteItem = (req, res) => {
     });
 };
 
-const likeItem = (req, res) =>
+const likeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $addToSet: { likes: req.user } },
+    { $addToSet: { likes: req.user._id } },
     { new: true }
   )
-    .then(res.send({ message: "Item liked" }))
+    .orFail((err) => {
+      const error = new Error("item not found");
+      error.name = err.name;
+      throw error;
+    })
+    .then((item) => res.send(item))
     .catch((e) => {
-      console.log(e);
-      res.status(500).send({ message: "Error from likeItem" });
+      console.log(e.name);
+      if (e.name === "DocumentNotFoundError") {
+        res.status(400).send({ message: "400 Item not found" });
+      } else if (e.name === "TypeError") {
+        res.status(404).send({ message: "404 Item not found" });
+      } else {
+        res.status(500).send({ message: "Error from likeItem" });
+      }
     });
+};
 
-const dislikeItem = (req, res) =>
+const dislikeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user } },
@@ -68,5 +80,6 @@ const dislikeItem = (req, res) =>
       console.log(e);
       res.status(500).send({ message: "Error from dislikeItem" });
     });
+};
 
 module.exports = { createItem, getItems, deleteItem, likeItem, dislikeItem };
