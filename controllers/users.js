@@ -20,8 +20,8 @@ const getUserById = (req, res) => {
   const { id } = req.params;
   User.findById(id)
     .then((data) => {
-      if (!data) {
-        res.send({ message: "no data found" });
+      if (!data || data === null) {
+        return res.status(404).send({ message: "404 no data found" });
       }
       res.send({ data });
     })
