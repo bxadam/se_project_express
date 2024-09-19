@@ -8,8 +8,12 @@ const createItem = (req, res) => {
       res.send({ data: item });
     })
     .catch((e) => {
-      console.error(e);
-      res.status(500).send({ message: "Error from createItem" });
+      if (e.name === "ValidationError") {
+        return res
+          .status(400)
+          .send({ message: "Bad Request Error from createItem" });
+      }
+      res.status(500).send({ message: "Server Error from createItem" });
     });
 };
 

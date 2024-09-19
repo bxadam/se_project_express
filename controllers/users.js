@@ -1,16 +1,18 @@
 const User = require("../models/user");
-const { findError } = require("../utils/errors");
 
 const getUsers = (req, res) => {
   User.find()
-    .orFail()
     .then((data) => {
       res.send({ data });
     })
     .catch((e) => {
       console.log(e.name);
-      console.error(e);
-      res.status(500).send({ message: "Error from getUser" });
+      if (e.name === "CastError") {
+        return res.status(400).send({ message: "400 Error from getUsers" });
+      } else if (e.name === 404) {
+        return res.status(404).send({ message: "404 Error from getUsers" });
+      }
+      res.status(500).send({ message: "Server Error from getUsers" });
     });
 };
 
@@ -24,9 +26,11 @@ const getUserById = (req, res) => {
       res.send({ data });
     })
     .catch((e) => {
-      console.error(e);
-      res.status(404).send({ message: "Error from getUserById" });
-      res.status(400).send({ message: "Error from getUserById" });
+      console.log(e.name);
+      if (e.name === "CastError") {
+        return res.status(400).send({ message: "400 Error from getUserById" });
+      }
+      res.status(500).send({ message: "404 Error from getUserById" });
     });
 };
 
@@ -37,7 +41,12 @@ const createUser = (req, res) => {
       res.send({ data });
     })
     .catch((e) => {
-      console.error(e);
+      console.log(e);
+      if (e.name === "ValidationError") {
+        return res
+          .status(400)
+          .send({ message: "Validation Error from createUser" });
+      }
       res.status(400).send({ message: "Error from createUser" });
     });
 };
