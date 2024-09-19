@@ -20,7 +20,7 @@ const createItem = (req, res) => {
 const getItems = (req, res) => {
   ClothingItem.find()
     .then((items) => {
-      res.send({ data: items });
+      res.send(items);
     })
     .catch((e) => {
       console.error(e);
