@@ -43,9 +43,7 @@ const deleteItem = (req, res) => {
       error.name = err.name;
       throw error;
     })
-    .then(() => {
-      return res.send({ message: "Item deleted" });
-    })
+    .then(() => res.send({ message: "Item deleted" }))
     .catch((e) => {
       console.error(e.name);
       if (e.name === "CastError") {
