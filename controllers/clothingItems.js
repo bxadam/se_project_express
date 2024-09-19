@@ -1,7 +1,7 @@
 const ClothingItem = require("../models/clothingItem");
 
 const createItem = (req, res) => {
-  const { name, weather, imageUrl, owner, likes, createdAt } = req.body;
+  const { name, weather, imageUrl, likes, createdAt } = req.body;
 
   ClothingItem.create({
     name,
@@ -48,24 +48,24 @@ const deleteItem = (req, res) => {
 const likeItem = (req, res) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $addToSet: { likes: req.user._id } },
+    { $addToSet: { likes: req.user } },
     { new: true }
   )
     .then(res.send({ message: "Item liked" }))
     .catch((e) => {
-      console.error(e);
+      console.log(e);
       res.status(500).send({ message: "Error from likeItem" });
     });
 
 const dislikeItem = (req, res) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $pull: { likes: req.user._id } },
+    { $pull: { likes: req.user } },
     { new: true }
   )
     .then(res.send({ message: "Item disliked" }))
     .catch((e) => {
-      console.error(e);
+      console.log(e);
       res.status(500).send({ message: "Error from dislikeItem" });
     });
 
