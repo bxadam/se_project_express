@@ -11,16 +11,14 @@ const createItem = (req, res) => {
     likes,
     createdAt,
   })
-    .then((item) => {
-      res.send(item);
-    })
+    .then((item) => res.send(item))
     .catch((e) => {
       if (e.name === "ValidationError") {
         return res
           .status(400)
           .send({ message: "Bad Request Error from createItem" });
       }
-      res.status(500).send({ message: "Server Error from createItem" });
+      return res.status(500).send({ message: "Server Error from createItem" });
     });
 };
 
@@ -50,10 +48,11 @@ const deleteItem = (req, res) => {
         return res
           .status(400)
           .send({ message: "Bad Request Error from deleteItem" });
-      } else if (e.name === "TypeError") {
+      }
+      if (e.name === "TypeError") {
         return res.status(404).send({ message: "404 Error from deleteItem" });
       }
-      res.status(500).send({ message: "Error from deleteItem" });
+      return res.status(500).send({ message: "Error from deleteItem" });
     });
 };
 
@@ -73,11 +72,11 @@ const likeItem = (req, res) => {
       console.log(e.name);
       if (e.name === "TypeError") {
         res.status(404).send({ message: "404 Item not found" });
-      } else if (e.name === "CastError") {
-        res.status(400).send({ message: "400 Item not found" });
-      } else {
-        res.status(500).send({ message: "Error from likeItem" });
       }
+      if (e.name === "CastError") {
+        res.status(400).send({ message: "400 Item not found" });
+      }
+      return res.status(500).send({ message: "Error from likeItem" });
     });
 };
 
@@ -92,18 +91,17 @@ const dislikeItem = (req, res) => {
       error.name = err.name;
       throw error;
     })
-    .then(() => {
-      return res.send({ message: "Item disliked" });
-    })
+    .then(() => res.send({ message: "Item disliked" }))
     .catch((e) => {
       console.log(e.name);
       if (e.name === "CastError") {
         return res.status(400).send({ message: "400 Bad Request" });
-      } else if (e.name === "TypeError") {
-        return res.status(404).send({ message: "404 Item not found" });
-      } else {
-        return res.status(500).send({ message: "Error from dislikeItem" });
       }
+      if (e.name === "TypeError") {
+        return res.status(404).send({ message: "404 Item not found" });
+      }
+
+      return res.status(500).send({ message: "Error from dislikeItem" });
     });
 };
 
