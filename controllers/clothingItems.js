@@ -1,24 +1,25 @@
 const ClothingItem = require("../models/clothingItem");
+const { NOT_FOUND, DEFAULT, BAD_REQUEST } = require("../utils/errors");
 
 const createItem = (req, res) => {
-  const { name, weather, imageUrl, likes, createdAt } = req.body;
+  const { name, weather, imageUrl } = req.body;
 
   ClothingItem.create({
     name,
     weather,
     imageUrl,
     owner: req.user,
-    likes,
-    createdAt,
   })
     .then((item) => res.send(item))
     .catch((e) => {
       if (e.name === "ValidationError") {
         return res
-          .status(400)
+          .status(BAD_REQUEST)
           .send({ message: "Bad Request Error from createItem" });
       }
-      return res.status(500).send({ message: "Server Error from createItem" });
+      return res
+        .status(DEFAULT)
+        .send({ message: "Server Error from createItem" });
     });
 };
 
@@ -29,16 +30,16 @@ const getItems = (req, res) => {
     })
     .catch((e) => {
       console.error(e);
-      res.status(500).send({ message: "Error from getItems" });
+      res.status(DEFAULT).send({ message: "Error from getItems" });
     });
 };
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
   ClothingItem.findByIdAndRemove(itemId)
-    .orFail((err) => {
+    .orFail(() => {
       const error = new Error("item not found");
-      error.name = err.name;
+      error.statusCode = NOT_FOUND;
       throw error;
     })
     .then(() => res.send({ message: "Item deleted" }))
@@ -46,13 +47,15 @@ const deleteItem = (req, res) => {
       console.error(e.name);
       if (e.name === "CastError") {
         return res
-          .status(400)
+          .status(BAD_REQUEST)
           .send({ message: "Bad Request Error from deleteItem" });
       }
-      if (e.name === "TypeError") {
-        return res.status(404).send({ message: "404 Error from deleteItem" });
+      if (e.statusCode === NOT_FOUND || e.name === "DocumentNotFoundError") {
+        return res
+          .status(NOT_FOUND)
+          .send({ message: "NOT_FOUND Error from deleteItem" });
       }
-      return res.status(500).send({ message: "Error from deleteItem" });
+      return res.status(DEFAULT).send({ message: "Error from deleteItem" });
     });
 };
 
@@ -62,46 +65,57 @@ const likeItem = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
-    .orFail((err) => {
+    .orFail(() => {
       const error = new Error("item not found");
-      error.name = err.name;
+      error.statusCode = NOT_FOUND;
       throw error;
     })
     .then((item) => res.send(item))
     .catch((e) => {
       console.log(e.name);
-      if (e.name === "TypeError") {
-        return res.status(404).send({ message: "404 Item not found" });
+      if (e.name === "DocumentNotFoundError") {
+        return res
+          .status(NOT_FOUND)
+          .send({ message: "NOT_FOUND Item not found" });
       }
       if (e.name === "CastError") {
-        return res.status(400).send({ message: "400 Item not found" });
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "BAD_REQUEST Item not found" });
       }
-      return res.status(500).send({ message: "Error from likeItem" });
+      if (e.statusCode === NOT_FOUND) {
+        return res.status(NOT_FOUND).send({ message: "404 from likeItem" });
+      }
+      return res.status(DEFAULT).send({ message: "Error from likeItem" });
     });
 };
 
 const dislikeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $pull: { likes: req.user } },
+    { $pull: { likes: req.user._id } },
     { new: true }
   )
-    .orFail((err) => {
+    .orFail(() => {
       const error = new Error("item not found");
-      error.name = err.name;
+      error.statusCode = NOT_FOUND;
       throw error;
     })
     .then(() => res.send({ message: "Item disliked" }))
     .catch((e) => {
       console.log(e.name);
       if (e.name === "CastError") {
-        return res.status(400).send({ message: "400 Bad Request" });
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "BAD_REQUEST Bad Request" });
       }
-      if (e.name === "TypeError") {
-        return res.status(404).send({ message: "404 Item not found" });
+      if (e.name === "DocumentNotFoundError" || e.statusCode === NOT_FOUND) {
+        return res
+          .status(NOT_FOUND)
+          .send({ message: "NOT_FOUND Item not found" });
       }
 
-      return res.status(500).send({ message: "Error from dislikeItem" });
+      return res.status(DEFAULT).send({ message: "Error from dislikeItem" });
     });
 };
 
