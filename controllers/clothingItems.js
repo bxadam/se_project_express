@@ -71,10 +71,10 @@ const likeItem = (req, res) => {
     .catch((e) => {
       console.log(e.name);
       if (e.name === "TypeError") {
-        res.status(404).send({ message: "404 Item not found" });
+        return res.status(404).send({ message: "404 Item not found" });
       }
       if (e.name === "CastError") {
-        res.status(400).send({ message: "400 Item not found" });
+        return res.status(400).send({ message: "400 Item not found" });
       }
       return res.status(500).send({ message: "Error from likeItem" });
     });
