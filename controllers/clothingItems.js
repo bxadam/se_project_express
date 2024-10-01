@@ -1,5 +1,11 @@
 const ClothingItem = require("../models/clothingItem");
-const { NOT_FOUND, DEFAULT, BAD_REQUEST } = require("../utils/errors");
+const {
+  NOT_FOUND,
+  DEFAULT,
+  BAD_REQUEST,
+  UNAUTHORIZED,
+  FORBIDDEN,
+} = require("../utils/errors");
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
@@ -36,11 +42,19 @@ const getItems = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  ClothingItem.findByIdAndRemove(itemId)
+  ClothingItem.findById(itemId)
     .orFail(() => {
       const error = new Error("item not found");
       error.statusCode = NOT_FOUND;
       throw error;
+    })
+    .then((item) => {
+      if (item.owner.toString() !== req.user.userId) {
+        const error = new Error("Forbidden");
+        error.statusCode = FORBIDDEN;
+        throw error;
+      }
+      return ClothingItem.findByIdAndRemove(itemId);
     })
     .then(() => res.send({ message: "Item deleted" }))
     .catch((e) => {
@@ -54,6 +68,9 @@ const deleteItem = (req, res) => {
         return res
           .status(NOT_FOUND)
           .send({ message: "NOT_FOUND Error from deleteItem" });
+      }
+      if (e.statusCode === FORBIDDEN) {
+        return res.status(FORBIDDEN).send({ message: "Forbidden" });
       }
       return res.status(DEFAULT).send({ message: "Error from deleteItem" });
     });
