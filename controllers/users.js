@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
-const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+
+const User = require("../models/user");
 
 const {
   NOT_FOUND,
@@ -80,26 +81,25 @@ const createUser = (req, res) => {
         return res
           .status(CONFLICT)
           .send({ message: "Account with Email already exists" });
-      } else {
-        bcrypt.hash(password, 10).then((pass) => {
-          User.create({ name, avatar, email, password: pass })
-            .then((data) => {
-              const { name, avatar, email } = data;
-              res.send({ data: { name, avatar, email } });
-            })
-            .catch((e) => {
-              console.log(e);
-              if (e.name === "ValidationError") {
-                return res
-                  .status(BAD_REQUEST)
-                  .send({ message: "Validation Error from createUser" });
-              }
+      }
+      return bcrypt.hash(password, 10).then((pass) => {
+        User.create({ name, avatar, email, password: pass })
+          .then((data) => {
+            const { name, avatar, email } = data;
+            res.send({ data: { name, avatar, email } });
+          })
+          .catch((e) => {
+            console.log(e);
+            if (e.name === "ValidationError") {
               return res
                 .status(BAD_REQUEST)
-                .send({ message: "Error from createUser" });
-            });
-        });
-      }
+                .send({ message: "Validation Error from createUser" });
+            }
+            return res
+              .status(BAD_REQUEST)
+              .send({ message: "Error from createUser" });
+          });
+      });
     })
     .catch((e) => {
       console.log(e);
@@ -118,10 +118,14 @@ const login = (req, res) => {
       res.send(token);
     })
     .catch((e) => {
+      console.error(e);
       if (e.name === "AuthenticationError") {
         return res
           .status(UNAUTHORIZED)
           .send({ message: "Invalid email or password" });
+      }
+      if (e.name === "Error") {
+        return res.status(BAD_REQUEST).send({ message: "Error from login" });
       }
       return res.status(DEFAULT).send({ message: "500 Error from login" });
     });

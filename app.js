@@ -22,7 +22,7 @@ app.post("/signin", login);
 app.post("/signup", createUser);
 app.get("/items", getItems);
 
-app.use(auth); //not running auth properly?
+app.use(auth);
 app.use(routes);
 
 app.listen(PORT, () => {

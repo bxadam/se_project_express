@@ -1,3 +1,3 @@
-const JWT_SECRET = process.env.SECRET_KEY;
+const { JWT_SECRET = "default" } = process.env;
 
 module.exports = JWT_SECRET;
