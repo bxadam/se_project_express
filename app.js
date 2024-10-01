@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 
 const app = express();
 const { PORT = 3001 } = process.env;
+const { login, createUser } = require("./controllers/users");
+const { getItems } = require("./controllers/clothingItems");
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/wtwr_db")
@@ -11,16 +13,16 @@ mongoose
   })
   .catch(console.error);
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: "66e9c5de563a63b079950b87",
-  };
-  next();
-});
-
 const routes = require("./routes");
+const auth = require("./middlewares/auth");
 
 app.use(express.json());
+
+app.post("/signin", login);
+app.post("/signup", createUser);
+app.get("/items", getItems);
+
+app.use(auth); //not running auth properly?
 app.use(routes);
 
 app.listen(PORT, () => {

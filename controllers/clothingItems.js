@@ -91,6 +91,7 @@ const likeItem = (req, res) => {
 };
 
 const dislikeItem = (req, res) => {
+  //configure user rights ?
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
