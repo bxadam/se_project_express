@@ -78,21 +78,23 @@ const createUser = (req, res) => {
           .status(BAD_REQUEST)
           .send({ message: "Account with Email already exists" });
       } else {
-        User.create({ name, avatar, email, password })
-          .then((data) => {
-            res.send({ data });
-          })
-          .catch((e) => {
-            console.log(e);
-            if (e.name === "ValidationError") {
+        bcrypt.hash(password, 10).then((pass) => {
+          User.create({ name, avatar, email, password: pass })
+            .then((data) => {
+              res.send({ data });
+            })
+            .catch((e) => {
+              console.log(e);
+              if (e.name === "ValidationError") {
+                return res
+                  .status(BAD_REQUEST)
+                  .send({ message: "Validation Error from createUser" });
+              }
               return res
                 .status(BAD_REQUEST)
-                .send({ message: "Validation Error from createUser" });
-            }
-            return res
-              .status(BAD_REQUEST)
-              .send({ message: "Error from createUser" });
-          });
+                .send({ message: "Error from createUser" });
+            });
+        });
       }
     })
     .catch((e) => {
