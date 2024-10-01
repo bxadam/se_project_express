@@ -8,7 +8,7 @@ const createItem = (req, res) => {
     name,
     weather,
     imageUrl,
-    owner: req.user,
+    owner: req.user.userId,
   })
     .then((item) => res.send(item))
     .catch((e) => {

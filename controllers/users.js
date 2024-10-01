@@ -24,7 +24,7 @@ const getUsers = (req, res) => {
 };
 
 const getCurrentUser = (req, res) => {
-  User.findById(req.user._id)
+  User.findById(req.user.userId)
     .then((data) => res.send({ data }))
     .catch((e) => {
       console.log(e.name);
@@ -33,9 +33,9 @@ const getCurrentUser = (req, res) => {
 };
 
 const updateUser = (req, res) => {
-  const { name, email } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, email }, { new: true })
-    .then((data) => res.send({ data }))
+  const { name, avatar } = req.body;
+  User.findByIdAndUpdate(req.user.userId, { name, avatar }, { new: true })
+    .then((data) => res.send(data))
     .catch((e) => {
       console.log(e.name);
       if (e.name === "ValidationError") {
@@ -115,7 +115,7 @@ const login = (req, res) => {
       const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.send(token);
+      return res.status(200).send({ token });
     })
     .catch((e) => {
       console.error(e);
