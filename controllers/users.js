@@ -1,10 +1,13 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+
 const {
   NOT_FOUND,
   DEFAULT,
   BAD_REQUEST,
   UNAUTHORIZED,
+  CONFLICT,
 } = require("../utils/errors");
 const JWT_SECRET = require("../utils/config");
 
@@ -75,13 +78,14 @@ const createUser = (req, res) => {
     .then((existingUser) => {
       if (existingUser) {
         return res
-          .status(BAD_REQUEST)
+          .status(CONFLICT)
           .send({ message: "Account with Email already exists" });
       } else {
         bcrypt.hash(password, 10).then((pass) => {
           User.create({ name, avatar, email, password: pass })
             .then((data) => {
-              res.send({ data });
+              const { name, avatar, email } = data;
+              res.send({ data: { name, avatar, email } });
             })
             .catch((e) => {
               console.log(e);
