@@ -78,7 +78,7 @@ const deleteItem = (req, res) => {
 const likeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $addToSet: { likes: req.user._id } },
+    { $addToSet: { likes: req.user.userId } },
     { new: true }
   )
     .orFail(() => {
@@ -110,7 +110,7 @@ const dislikeItem = (req, res) => {
   // configure user rights ?
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $pull: { likes: req.user._id } },
+    { $pull: { likes: req.user.userId } },
     { new: true }
   )
     .orFail(() => {
