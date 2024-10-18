@@ -55,7 +55,7 @@ const deleteItem = (req, res) => {
       }
       return ClothingItem.findByIdAndRemove(itemId);
     })
-    .then((item) => res.send(item))
+    .then(() => res.send({ message: "Item deleted" }))
     .catch((e) => {
       console.error(e.name);
       if (e.name === "CastError") {
@@ -107,7 +107,6 @@ const likeItem = (req, res) => {
 };
 
 const dislikeItem = (req, res) => {
-  // configure user rights ?
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user.userId } },
@@ -118,7 +117,7 @@ const dislikeItem = (req, res) => {
       error.statusCode = NOT_FOUND;
       throw error;
     })
-    .then(() => res.send({ message: "Item disliked" }))
+    .then((item) => res.send(item))
     .catch((e) => {
       console.log(e.name);
       if (e.name === "CastError") {
