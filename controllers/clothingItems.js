@@ -55,7 +55,7 @@ const deleteItem = (req, res) => {
       }
       return ClothingItem.findByIdAndRemove(itemId);
     })
-    .then(() => res.send({ message: "Item deleted" }))
+    .then((item) => res.send(item))
     .catch((e) => {
       console.error(e.name);
       if (e.name === "CastError") {
