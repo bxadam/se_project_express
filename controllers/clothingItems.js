@@ -1,10 +1,10 @@
 const ClothingItem = require("../models/clothingItem");
-const {
-  NOT_FOUND,
-  DEFAULT,
-  BAD_REQUEST,
-  FORBIDDEN,
-} = require("../utils/errors");
+// const {
+//   NOT_FOUND,
+//   DEFAULT,
+//   BAD_REQUEST,
+//   FORBIDDEN,
+// } = require("../utils/errors");
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
