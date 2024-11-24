@@ -74,3 +74,10 @@ const validateId = celebrate({
     }),
   }),
 });
+
+module.exports = {
+  validateCardBody,
+  validateLogin,
+  validateId,
+  validateUserInfo,
+};

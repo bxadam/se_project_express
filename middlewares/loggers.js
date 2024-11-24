@@ -1,6 +1,5 @@
 const winston = require("winston");
 const expressWinston = require("express-winston");
-const { json } = require("express");
 
 const messageFormat = winston.format.combine(
   winston.format.timestamp(),
