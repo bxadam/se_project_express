@@ -34,7 +34,7 @@ const updateUser = (req, res) => {
         return res.status(NOT_FOUND).send({ message: "User not found" });
       }
       return res.status(DEFAULT).send({ message: "Error, User not found" });
-    }); // how do I enable validation for this request?
+    });
 };
 
 const createUser = (req, res) => {
