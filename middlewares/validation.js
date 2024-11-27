@@ -65,11 +65,6 @@ const validateLogin = celebrate({
 
 const validateId = celebrate({
   params: Joi.object().keys({
-    _id: Joi.string().required().length(24).hex().messages({
-      "string.empty": 'The "Id" field must be filled in',
-      "string.length": 'The "Id" field must be 24 characters long',
-      "string.hex": 'The "Id" field must be a valid hex string',
-    }),
     itemId: Joi.string().required().length(24).hex().messages({
       "string.empty": 'The "Id" field must be filled in',
       "string.length": 'The "Id" field must be 24 characters long',
