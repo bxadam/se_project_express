@@ -5,6 +5,15 @@ const cors = require("cors");
 const { errors } = require("celebrate");
 const { requestLogger, errorLogger } = require("./middlewares/loggers");
 
+// Security
+import { rateLimit } from "express-rate-limit";
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Request limit exceeded. Activating Self-Destruct Mode.",
+});
+const helmet = require("helmet");
+
 const app = express();
 const { PORT = 3001 } = process.env;
 const { login, createUser } = require("./controllers/users");
@@ -29,6 +38,9 @@ app.get("/crash-test", () => {
     throw new Error("Server will crash now");
   }, 0);
 });
+
+app.use(limiter);
+app.use(helmet());
 
 app.post("/signin", login);
 app.post("/signup", createUser);
