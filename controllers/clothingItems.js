@@ -4,7 +4,7 @@ const { NOT_FOUND } = require("../utils/errors/not-found");
 const { FORBIDDEN } = require("../utils/errors/forbidden");
 const { DEFAULT } = require("../utils/errors/default");
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
 
   ClothingItem.create({
@@ -22,22 +22,18 @@ const createItem = (req, res) => {
     });
 };
 
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   ClothingItem.find()
     .then((items) => {
       res.send(items);
     })
-    .catch((err) => {
-      return next(err);
-    });
+    .catch((err) => next(err));
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
   ClothingItem.findById(itemId)
-    .orFail(() => {
-      return next(new DEFAULT("An unknown error has occurred."));
-    })
+    .orFail(() => next(new DEFAULT("An unknown error has occurred.")))
     .then((item) => {
       if (item.owner.toString() !== req.user.userId) {
         return next(new FORBIDDEN("Authorization Required"));
@@ -63,18 +59,15 @@ const deleteItem = (req, res) => {
     });
 };
 
-const likeItem = (req, res) => {
+const likeItem = (req, res, next) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user.userId } },
     { new: true }
   )
-    .orFail(() => {
-      return next(new DEFAULT("An unknown error has occurred."));
-    })
+    .orFail(() => next(new DEFAULT("An unknown error has occurred.")))
     .then((item) => res.send(item))
     .catch((err) => {
-      console.log(err.name);
       if (err.name === "DocumentNotFoundError") {
         return next(new NOT_FOUND("Not found. Please adjust and try again."));
       }
@@ -88,18 +81,15 @@ const likeItem = (req, res) => {
     });
 };
 
-const dislikeItem = (req, res) => {
+const dislikeItem = (req, res, next) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user.userId } },
     { new: true }
   )
-    .orFail(() => {
-      return next(new DEFAULT("An unknown error has occurred."));
-    })
+    .orFail(() => next(new DEFAULT("An unknown error has occurred.")))
     .then((item) => res.send(item))
     .catch((err) => {
-      console.log(err.name);
       if (err.name === "CastError") {
         return next(new BAD_REQUEST("Invalid data"));
       }

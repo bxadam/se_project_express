@@ -7,18 +7,17 @@ const { BAD_REQUEST } = require("../utils/errors/bad-request");
 const { NOT_FOUND } = require("../utils/errors/not-found");
 const { UNAUTHORIZED } = require("../utils/errors/unauthorized");
 const { CONFLICT } = require("../utils/errors/conflict");
+const { DEFAULT } = require("../utils/errors/default");
 
 const JWT_SECRET = require("../utils/config");
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   User.findById(req.user.userId)
     .then((data) => res.send({ data }))
-    .catch((err) => {
-      return next(err);
-    });
+    .catch((err) => next(err));
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, avatar } = req.body;
   User.findByIdAndUpdate(req.user.userId, { name, avatar }, { new: true })
     .then((data) => res.send(data))
@@ -33,7 +32,7 @@ const updateUser = (req, res) => {
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   User.findOne({ email })
@@ -56,12 +55,10 @@ const createUser = (req, res) => {
           });
       });
     })
-    .catch((err) => {
-      return next(err);
-    });
+    .catch((err) => next(err));
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
