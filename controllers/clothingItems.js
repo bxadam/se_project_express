@@ -1,10 +1,8 @@
 const ClothingItem = require("../models/clothingItem");
-// const {
-//   NOT_FOUND,
-//   DEFAULT,
-//   BAD_REQUEST,
-//   FORBIDDEN,
-// } = require("../utils/errors");
+const { BAD_REQUEST } = require("../utils/errors/bad-request");
+const { NOT_FOUND } = require("../utils/errors/not-found");
+const { FORBIDDEN } = require("../utils/errors/forbidden");
+const { DEFAULT } = require("../utils/errors/default");
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
@@ -16,15 +14,11 @@ const createItem = (req, res) => {
     owner: req.user.userId,
   })
     .then((item) => res.send(item))
-    .catch((e) => {
-      if (e.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Bad Request Error from createItem" });
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return next(new BAD_REQUEST("Invalid data"));
       }
-      return res
-        .status(DEFAULT)
-        .send({ message: "Server Error from createItem" });
+      return next(err);
     });
 };
 
@@ -33,9 +27,8 @@ const getItems = (req, res) => {
     .then((items) => {
       res.send(items);
     })
-    .catch((e) => {
-      console.error(e);
-      res.status(DEFAULT).send({ message: "Error from getItems" });
+    .catch((err) => {
+      return next(err);
     });
 };
 
@@ -43,35 +36,30 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
   ClothingItem.findById(itemId)
     .orFail(() => {
-      const error = new Error("item not found");
-      error.statusCode = NOT_FOUND;
-      throw error;
+      return next(new DEFAULT("An unknown error has occurred."));
     })
     .then((item) => {
       if (item.owner.toString() !== req.user.userId) {
-        const error = new Error("Forbidden");
-        error.statusCode = FORBIDDEN;
-        throw error;
+        return next(new FORBIDDEN("Authorization Required"));
       }
       return ClothingItem.findByIdAndRemove(itemId);
     })
     .then(() => res.send({ message: "Item deleted" }))
-    .catch((e) => {
-      console.error(e.name);
-      if (e.name === "CastError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Bad Request Error from deleteItem" });
+    .catch((err) => {
+      console.error(err.name);
+      if (err.name === "CastError") {
+        return next(new BAD_REQUEST("Invalid data"));
       }
-      if (e.statusCode === NOT_FOUND || e.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "NOT_FOUND Error from deleteItem" });
+      if (
+        err.statusCode === NOT_FOUND ||
+        err.name === "DocumentNotFoundError"
+      ) {
+        return next(new NOT_FOUND("Not found. Please adjust and try again."));
       }
-      if (e.statusCode === FORBIDDEN) {
-        return res.status(FORBIDDEN).send({ message: "Forbidden" });
+      if (err.statusCode === FORBIDDEN) {
+        return next(new FORBIDDEN("Authorization Required"));
       }
-      return res.status(DEFAULT).send({ message: "Error from deleteItem" });
+      return next(err);
     });
 };
 
@@ -82,27 +70,21 @@ const likeItem = (req, res) => {
     { new: true }
   )
     .orFail(() => {
-      const error = new Error("item not found");
-      error.statusCode = NOT_FOUND;
-      throw error;
+      return next(new DEFAULT("An unknown error has occurred."));
     })
     .then((item) => res.send(item))
-    .catch((e) => {
-      console.log(e.name);
-      if (e.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "NOT_FOUND Item not found" });
+    .catch((err) => {
+      console.log(err.name);
+      if (err.name === "DocumentNotFoundError") {
+        return next(new NOT_FOUND("Not found. Please adjust and try again."));
       }
-      if (e.name === "CastError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "BAD_REQUEST Item not found" });
+      if (err.name === "CastError") {
+        return next(new BAD_REQUEST("Invalid data"));
       }
-      if (e.statusCode === NOT_FOUND) {
-        return res.status(NOT_FOUND).send({ message: "404 from likeItem" });
+      if (err.statusCode === NOT_FOUND) {
+        return next(new NOT_FOUND("Not found. Please adjust and try again."));
       }
-      return res.status(DEFAULT).send({ message: "Error from likeItem" });
+      return next(err);
     });
 };
 
@@ -113,25 +95,22 @@ const dislikeItem = (req, res) => {
     { new: true }
   )
     .orFail(() => {
-      const error = new Error("item not found");
-      error.statusCode = NOT_FOUND;
-      throw error;
+      return next(new DEFAULT("An unknown error has occurred."));
     })
     .then((item) => res.send(item))
-    .catch((e) => {
-      console.log(e.name);
-      if (e.name === "CastError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "BAD_REQUEST Bad Request" });
+    .catch((err) => {
+      console.log(err.name);
+      if (err.name === "CastError") {
+        return next(new BAD_REQUEST("Invalid data"));
       }
-      if (e.name === "DocumentNotFoundError" || e.statusCode === NOT_FOUND) {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "NOT_FOUND Item not found" });
+      if (
+        err.name === "DocumentNotFoundError" ||
+        err.statusCode === NOT_FOUND
+      ) {
+        return next(new NOT_FOUND("Not found. Please adjust and try again."));
       }
 
-      return res.status(DEFAULT).send({ message: "Error from dislikeItem" });
+      return next(err);
     });
 };
 
