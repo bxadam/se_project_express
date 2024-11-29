@@ -1,18 +1,20 @@
-require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const { errors } = require("celebrate");
-const { requestLogger, errorLogger } = require("./middlewares/loggers");
-
 // Security
 import { rateLimit } from "express-rate-limit";
+
+require("dotenv").config();
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: "Request limit exceeded. Activating Self-Destruct Mode.",
 });
 const helmet = require("helmet");
+
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const { errors } = require("celebrate");
+const { requestLogger, errorLogger } = require("./middlewares/loggers");
 
 const app = express();
 const { PORT = 3001 } = process.env;
