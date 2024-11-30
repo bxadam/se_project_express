@@ -6,6 +6,6 @@ module.exports = (err, req, res, next) => {
       : err.message;
 
   console.error(err);
-  res.status(statusCode).send(message);
+  res.status(statusCode).send({ message });
   next();
 };

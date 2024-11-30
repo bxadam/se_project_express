@@ -1,5 +1,5 @@
 // Security
-import { rateLimit } from "express-rate-limit";
+const rateLimit = require("express-rate-limit");
 
 require("dotenv").config();
 
@@ -31,6 +31,7 @@ mongoose
 const routes = require("./routes");
 const auth = require("./middlewares/auth");
 const errorHandler = require("./middlewares/error-handler");
+const { validateLogin, validateUserInfo } = require("./middlewares/validation");
 
 app.use(express.json());
 app.use(cors());
@@ -44,12 +45,13 @@ app.get("/crash-test", () => {
 app.use(limiter);
 app.use(helmet());
 
-app.post("/signin", login);
-app.post("/signup", createUser);
+app.use(requestLogger);
+
+app.post("/signin", validateLogin, login);
+app.post("/signup", validateUserInfo, createUser);
 app.get("/items", getItems);
 
 app.use(auth);
-app.use(requestLogger);
 app.use(routes);
 
 app.use(errorLogger);
