@@ -34,14 +34,17 @@ const getItems = (req, res, next) => {
 const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
   ClothingItem.findById(itemId)
-    .orFail(() => next(new DEFAULT("An unknown error has occurred.")))
+    .orFail(() =>
+      next(new NOT_FOUND("Not found. Please adjust and try again."))
+    )
     .then((item) => {
       if (item.owner.toString() !== req.user.userId) {
-        return next(new FORBIDDEN("Authorization Required"));
+        return next(new NOT_FOUND("Not found. Please adjust and try again."));
       }
-      return ClothingItem.findByIdAndRemove(itemId);
+      return ClothingItem.findByIdAndRemove(itemId).then(() =>
+        res.send({ message: "Item deleted" })
+      );
     })
-    .then(() => res.send({ message: "Item deleted" }))
     .catch((err) => {
       console.error(err.name);
       if (err.name === "CastError") {
@@ -66,7 +69,9 @@ const likeItem = (req, res, next) => {
     { $addToSet: { likes: req.user.userId } },
     { new: true }
   )
-    .orFail(() => next(new DEFAULT("An unknown error has occurred.")))
+    .orFail(() =>
+      next(new NOT_FOUND("Not found. Please adjust and try again."))
+    )
     .then((item) => res.send(item))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
@@ -88,7 +93,9 @@ const dislikeItem = (req, res, next) => {
     { $pull: { likes: req.user.userId } },
     { new: true }
   )
-    .orFail(() => next(new DEFAULT("An unknown error has occurred.")))
+    .orFail(() =>
+      next(new NOT_FOUND("Not found. Please adjust and try again."))
+    )
     .then((item) => res.send(item))
     .catch((err) => {
       if (err.name === "CastError") {
